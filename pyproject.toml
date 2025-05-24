@@ -1,17 +1,20 @@
-[project]
+[tool.poetry]
 name = "ai-call-server"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "Alan Fang",email = "disflyer123@gmail.com"}
-]
+description = "AI帮用户打电话订餐"
+authors = ["Alan Fang <disflyer123@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "fastapi (>=0.115.12,<0.116.0)",
-    "uvicorn[standard] (>=0.34.2,<0.35.0)"
-]
 
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+fastapi = "^0.115.12"
+uvicorn = {extras = ["standard"], version = "^0.34.2"}
+sqlalchemy = "^2.0.30"
+pydantic = "^2.11.5"
+python-dotenv = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+# 可选：开发依赖
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
