@@ -18,4 +18,4 @@ class ShopUpdate(ShopBase):
 class ShopInDB(ShopBase):
     id: int
     class Config:
-        orm_mode = True 
+        from_attributes = True 
