@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserLogin, UserInDB
 from app.crud import user as crud_user
@@ -41,9 +41,13 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @router.post("/login")
-def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = crud_user.get_user_by_email(db, user.email)
-    if not db_user or not db_user.hashed_password or not verify_password(user.password, db_user.hashed_password):
+def login(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    db_user = crud_user.get_user_by_email(db, username)
+    if not db_user or not db_user.hashed_password or not verify_password(password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="邮箱或密码错误")
     access_token = create_access_token(
         data={"sub": db_user.id},
