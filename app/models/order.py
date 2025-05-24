@@ -13,7 +13,7 @@ class Order(Base):
     __tablename__ = 'orders'
     id = Column(Integer, primary_key=True, index=True)
     customer_name = Column(String(100), nullable=False)
-    party_size = Column(Integer, nullable=False)
+    party_size = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=False)
     arrive_time = Column(DateTime, nullable=False)
     remark = Column(Text, nullable=True)
