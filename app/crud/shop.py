@@ -4,18 +4,19 @@ from app.schemas.shop import ShopCreate, ShopUpdate
 
 # 新增或更新商店（有id则更新，无id则新增）
 def upsert_shop(db: Session, shop: ShopCreate, user_id: int) -> Shop:
-    if hasattr(shop, 'id') and shop.id:
+    if hasattr(shop, 'id') and getattr(shop, 'id', None):
         db_shop = db.query(Shop).filter(Shop.id == shop.id, Shop.user_id == user_id).first()
         if not db_shop:
             return None
         for k, v in shop.dict(exclude_unset=True).items():
-            if k != 'id':
+            if k not in ('id', 'user_id'):
                 setattr(db_shop, k, v)
         db.commit()
         db.refresh(db_shop)
         return db_shop
     else:
-        db_shop = Shop(**shop.dict(), user_id=user_id)
+        data = shop.dict(exclude={"user_id"})
+        db_shop = Shop(**data, user_id=user_id)
         db.add(db_shop)
         db.commit()
         db.refresh(db_shop)

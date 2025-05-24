@@ -4,18 +4,19 @@ from app.schemas.order import OrderCreate, OrderUpdate
 
 # 新增或更新订单（有id则更新，无id则新增）
 def upsert_order(db: Session, order: OrderCreate, user_id: int) -> Order:
-    if hasattr(order, 'id') and order.id:
+    if hasattr(order, 'id') and getattr(order, 'id', None):
         db_order = db.query(Order).filter(Order.id == order.id, Order.user_id == user_id).first()
         if not db_order:
             return None
         for k, v in order.dict(exclude_unset=True).items():
-            if k != 'id':
+            if k not in ('id', 'user_id'):
                 setattr(db_order, k, v)
         db.commit()
         db.refresh(db_order)
         return db_order
     else:
-        db_order = Order(**order.dict(), user_id=user_id)
+        data = order.dict(exclude={"user_id"})
+        db_order = Order(**data, user_id=user_id)
         db.add(db_order)
         db.commit()
         db.refresh(db_order)
