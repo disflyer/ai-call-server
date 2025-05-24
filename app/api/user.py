@@ -30,8 +30,9 @@ def send_code(email: str):
 
 @router.post("/register", response_model=UserInDB)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    if verify_codes.get(user.email) != user.code:
-        raise HTTPException(status_code=400, detail="验证码错误")
+    # 测试阶段，验证码随意输入都通过
+    # if verify_codes.get(user.email) != user.code:
+    #     raise HTTPException(status_code=400, detail="验证码错误")
     db_user = crud_user.create_user(db, user)
     if not db_user:
         raise HTTPException(status_code=400, detail="用户已存在")
@@ -39,8 +40,9 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(user: UserLogin):
-    if verify_codes.get(user.email) != user.code:
-        raise HTTPException(status_code=400, detail="验证码错误")
+    # 测试阶段，验证码随意输入都通过
+    # if verify_codes.get(user.email) != user.code:
+    #     raise HTTPException(status_code=400, detail="验证码错误")
     # 实际应返回token
     return {"msg": "登录成功"}
 
