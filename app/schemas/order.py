@@ -5,7 +5,7 @@ from app.models.order import OrderStatus
 
 class OrderBase(BaseModel):
     customer_name: str
-    party_size: int
+    party_size: str
     phone: str
     arrive_time: datetime
     remark: Optional[str] = None
