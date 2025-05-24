@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
 from app.models.base import Base
+from app.core.config import settings
 
 class Shop(Base):
     __tablename__ = 'shops'
@@ -9,4 +10,5 @@ class Shop(Base):
     phone = Column(String(20), nullable=False)
     address = Column(String(255), nullable=False)
     image_url = Column(String(255), nullable=True)
-    open_hours = Column(String(100), nullable=True) 
+    open_hours = Column(String(100), nullable=True)
+    user_id = Column(Integer, ForeignKey(f'{settings.SCHEMA}.users.id'), nullable=False, index=True) 

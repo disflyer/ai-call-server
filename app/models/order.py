@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text
 from sqlalchemy.orm import relationship
 from app.models.base import Base
+from app.core.config import settings
 import enum
 
 class OrderStatus(str, enum.Enum):
@@ -16,6 +17,7 @@ class Order(Base):
     phone = Column(String(20), nullable=False)
     arrive_time = Column(DateTime, nullable=False)
     remark = Column(Text, nullable=True)
-    shop_id = Column(Integer, ForeignKey('shops.id'), nullable=False)
+    shop_id = Column(Integer, ForeignKey(f'{settings.SCHEMA}.shops.id'), nullable=False)
     status = Column(Enum(OrderStatus), default=OrderStatus.created, nullable=False)
+    user_id = Column(Integer, ForeignKey(f'{settings.SCHEMA}.users.id'), nullable=False, index=True)
     shop = relationship('Shop') 

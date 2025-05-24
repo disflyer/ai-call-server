@@ -8,6 +8,8 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 import random
 import string
+from app.core.auth import create_access_token
+from datetime import timedelta
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -39,12 +41,17 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @router.post("/login")
-def login(user: UserLogin):
+def login(user: UserLogin, db: Session = Depends(get_db)):
     # 测试阶段，验证码随意输入都通过
-    # if verify_codes.get(user.email) != user.code:
-    #     raise HTTPException(status_code=400, detail="验证码错误")
-    # 实际应返回token
-    return {"msg": "登录成功"}
+    db_user = crud_user.get_user_by_email(db, user.email)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    # 生成token
+    access_token = create_access_token(
+        data={"sub": db_user.id},
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/{user_id}", response_model=UserInDB)
 def get_user(user_id: int, db: Session = Depends(get_db)):

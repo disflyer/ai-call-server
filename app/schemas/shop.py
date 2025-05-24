@@ -10,12 +10,14 @@ class ShopBase(BaseModel):
     open_hours: Optional[str] = Field(None, example="10:00-22:00")
 
 class ShopCreate(ShopBase):
-    pass
+    user_id: Optional[int] = None
 
 class ShopUpdate(ShopBase):
-    pass
+    id: int
+    user_id: Optional[int] = None
 
 class ShopInDB(ShopBase):
     id: int
+    user_id: int
     class Config:
         from_attributes = True 
