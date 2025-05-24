@@ -10,6 +10,7 @@ import random
 import string
 from app.core.auth import create_access_token
 from datetime import timedelta
+from app.core.config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])
 
