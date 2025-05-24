@@ -13,6 +13,7 @@ sqlalchemy = "^2.0"
 pydantic = "^2.11.5"
 python-dotenv = "^1.1.0"
 pydantic-settings = "^2.2.1"
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.dev-dependencies]
 # 可选：开发依赖
