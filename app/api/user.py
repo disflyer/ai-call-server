@@ -11,6 +11,7 @@ import string
 from app.core.auth import create_access_token
 from datetime import timedelta
 from app.core.config import settings
+from app.crud.user import verify_password
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -34,8 +35,6 @@ def send_code(email: str):
 @router.post("/register", response_model=UserInDB)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     # 测试阶段，验证码随意输入都通过
-    # if verify_codes.get(user.email) != user.code:
-    #     raise HTTPException(status_code=400, detail="验证码错误")
     db_user = crud_user.create_user(db, user)
     if not db_user:
         raise HTTPException(status_code=400, detail="用户已存在")
@@ -43,11 +42,9 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
-    # 测试阶段，验证码随意输入都通过
     db_user = crud_user.get_user_by_email(db, user.email)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    # 生成token
+    if not db_user or not db_user.hashed_password or not verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=400, detail="邮箱或密码错误")
     access_token = create_access_token(
         data={"sub": db_user.id},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
