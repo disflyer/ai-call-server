@@ -18,6 +18,8 @@ email-validator = "^2.2.0"
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
 python-multipart = "0.0.9"
+requests = "^2.32.3"
+bcrypt = "^4.3.0"
 
 [tool.poetry.dev-dependencies]
 # 可选：开发依赖
