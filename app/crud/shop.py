@@ -37,4 +37,10 @@ def delete_shop(db: Session, shop_id: int, user_id: int):
         return None
     db.delete(db_shop)
     db.commit()
-    return db_shop 
+    return db_shop
+
+def get_shop_by_name_and_address(db: Session, name: str, address: str, user_id: int):
+    """
+    根据店铺名、地址和用户ID查找唯一店铺
+    """
+    return db.query(Shop).filter(Shop.name == name, Shop.address == address, Shop.user_id == user_id).first() 

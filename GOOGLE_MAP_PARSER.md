@@ -71,10 +71,22 @@ Content-Type: application/json
 
 ## 解析逻辑
 
-1. **页面内容获取**：使用requests获取Google Map页面的HTML内容
-2. **AI解析**：通过Gemini AI模型解析页面内容，提取结构化的店铺信息
-3. **数据验证**：对解析结果进行验证和清理
-4. **数据库存储**：将解析后的店铺信息保存到数据库
+1. **短链重定向处理**：自动跟踪Google Map短链（如 `https://maps.app.goo.gl/xxx`）的重定向，获取最终完整URL
+2. **页面内容获取**：使用requests获取重定向后的完整Google Map页面的HTML内容
+3. **AI解析**：通过Gemini AI模型解析页面内容，提取结构化的店铺信息
+4. **数据验证**：对解析结果进行验证和清理
+5. **数据库存储**：将解析后的店铺信息保存到数据库
+
+### 重定向处理详情
+
+Google Map的短链会进行多次重定向才到达最终页面，系统会：
+
+- 自动跟踪所有重定向步骤
+- 记录重定向历史和最终URL
+- 分析URL参数以获取额外信息
+- 使用最终完整URL获取页面内容
+
+这样可以确保获取到最完整、最准确的页面信息，提高解析成功率。
 
 ## 支持的信息字段
 
@@ -89,8 +101,58 @@ Content-Type: application/json
 
 运行测试脚本：
 ```bash
+# 通用模型测试
+python test_gemini_models.py
+
+# API功能测试
 python test_google_map_parser.py
+
+# 特定链接调试测试
+python test_google_map_specific.py
 ```
+
+### 调试Google Map解析问题
+
+如果遇到电话号码或营业时间解析不准确的问题，请按以下步骤调试：
+
+1. **运行专项测试**：
+   ```bash
+   python test_google_map_specific.py
+   ```
+
+2. **检查生成的调试文件**：
+   - `debug_google_map_content.html` - 页面原始内容
+   - `successful_parse_result.json` - 成功解析的结果
+
+3. **分析页面内容**：
+   查看 `debug_google_map_content.html` 文件，搜索以下关键词：
+   - 电话号码：`tel:`, `phone`, `电话`, `☎`, `+`
+   - 营业时间：`hours`, `营业时间`, `open`, `close`
+   - 评分：`rating`, `stars`, `评分`
+
+### 解析准确性优化
+
+当前版本的改进包括：
+
+1. **增强的prompt设计**：
+   - 更详细的提取指令
+   - 明确的数据格式要求
+   - 多种可能的关键词匹配
+
+2. **更好的HTTP请求**：
+   - 更完整的请求头
+   - 更长的超时时间
+   - 更新的User-Agent
+
+3. **改进的JSON解析**：
+   - 多种JSON提取策略
+   - 错误处理和回退机制
+   - 详细的解析日志
+
+4. **优化的模型配置**：
+   - 降低temperature提高准确性
+   - 合适的token限制
+   - 多模型备选机制
 
 ## 故障排除
 
