@@ -95,7 +95,6 @@ def parse_google_map_with_gemini(google_map_url: str) -> dict:
         3. 电话号码（包含国际/地区代码）
         4. 完整详细地址
         5. 营业时间信息
-        6. 店铺主要图片URL
         - rating 必须是数字格式（如：4.5, 3.8），找不到设置为 0.0
         """
 
