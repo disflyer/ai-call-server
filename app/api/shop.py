@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.shop import ShopCreate, ShopUpdate, ShopInDB, ShopBase
@@ -7,7 +8,6 @@ from typing_extensions import TypedDict
 from app.core.auth import get_current_user
 from app.models.user import User
 from google import genai
-from google.genai import types
 import os
 import logging
 from pydantic import BaseModel
