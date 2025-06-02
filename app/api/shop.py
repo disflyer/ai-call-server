@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.schemas.shop import ShopCreate, ShopUpdate, ShopInDB, ShopBase
 from app.crud import shop as crud_shop
 from app.models.base import SessionLocal
-from typing import List, TypedDict
+from typing_extensions import TypedDict
 from app.core.auth import get_current_user
 from app.models.user import User
 from google import genai
@@ -112,17 +112,14 @@ def parse_google_map_with_gemini(google_map_url: str) -> dict:
         for model_name in model_options:
             try:
                 logger.info(f"尝试使用模型: {model_name}")
-                generation_config = types.GenerationConfig({
-                    "temperature": 0.1,
-                    "top_p": 0.8,
-                    "top_k": 20,
-                    "max_output_tokens": 1024,
-                    "response_mime_type": "application/json",
-                    "response_schema": ShopSchema,
-                })
-                response = client.generate_content(
+                generation_config = {
+                "response_mime_type": "application/json",
+                "temperature": 0,
+                "response_schema": ShopSchema,
+            }
+                response = client.models.generate_content(
                     contents=prompt,
-                    generation_config=generation_config,
+                    config=generation_config,
                     model=model_name
                 )
                 logger.info(f"成功使用模型: {model_name}")
