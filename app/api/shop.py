@@ -34,7 +34,7 @@ class ShopSchema(TypedDict):
     rating: float
     phone: str
     address: str
-    image_url: str
+    # image_url: str
     open_hours: str
 
 def get_db():
