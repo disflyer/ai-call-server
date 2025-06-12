@@ -12,7 +12,7 @@ import os
 import logging
 from pydantic import BaseModel
 import re
-from app.crud.shop import get_shop_by_name_and_address
+from app.crud.shop import get_shop_by_name_and_address, get_shop_by_google_map_url
 import json
 import requests
 
@@ -34,7 +34,7 @@ class ShopSchema(TypedDict):
     rating: float
     phone: str
     address: str
-    # image_url: str
+    image_url: str
     open_hours: str
 
 def get_db():
@@ -87,20 +87,21 @@ def parse_google_map_with_gemini(google_map_url: str) -> dict:
         logger.info(f"最终解析URL: {final_url}")
 
         prompt = f"""
-        请访问这个Google Maps链接并提取店铺信息：{final_url}
+        请访问这个链接并提取店铺信息：{final_url}
 
-        请仔细分析该Google Maps页面，提取以下店铺信息：
+        请仔细分析该页面，提取以下店铺信息：
         1. 店铺完整名称
         2. 店铺评分（1-5分）
         3. 电话号码（包含国际/地区代码）
         4. 完整详细地址
         5. 营业时间信息
+        6. 店铺图片URL
         - rating 必须是数字格式（如：4.5, 3.8），找不到设置为 0.0
         """
 
         model_options = [
-            'gemini-2.0-flash-lite',
             'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
             'gemini-2.5-flash-preview-05-20',
         ]
 
@@ -188,6 +189,12 @@ def parse_and_create_shop_from_google_map(
     解析Google Map链接，提取店铺信息并保存到数据库
     """
     try:
+        # 首先检查Google Map URL是否已存在（全局唯一性检查）
+        existing_shop = get_shop_by_google_map_url(db, request.google_map_url)
+        if existing_shop:
+            logger.info(f"Google Map URL已存在，返回现有店铺: {existing_shop.name}")
+            return existing_shop
+        
         # 使用Gemini解析Google Map
         shop_data = parse_google_map_with_gemini(request.google_map_url)
 
@@ -195,13 +202,17 @@ def parse_and_create_shop_from_google_map(
         if not any([shop_data.get("name"), shop_data.get("address"), shop_data.get("phone")]):
             logger.warning(f"Gemini结构化输出为空，建议检查prompt或模型能力。")
 
-        # 查重：同名同址同用户只保留一条
+        # 查重：同名同址同用户只保留一条（作为备用检查）
         exist_shop = get_shop_by_name_and_address(db, shop_data["name"], shop_data["address"], user_id=current_user.id)
         if exist_shop:
-            logger.info(f"已存在同名同址店铺，直接返回: {exist_shop.name}")
+            logger.info(f"已存在同名同址店铺，更新Google Map URL: {exist_shop.name}")
+            # 更新现有店铺的Google Map URL
+            exist_shop.google_map_url = request.google_map_url
+            db.commit()
+            db.refresh(exist_shop)
             return exist_shop
         
-        # 创建ShopCreate对象，补充user_id
+        # 创建ShopCreate对象，包含Google Map URL
         shop_create = ShopCreate(
             name=shop_data["name"],
             rating=shop_data["rating"],
@@ -209,16 +220,22 @@ def parse_and_create_shop_from_google_map(
             address=shop_data["address"],
             image_url=shop_data["image_url"],
             open_hours=shop_data["open_hours"],
+            google_map_url=request.google_map_url,  # 保存原始Google Map URL
             user_id=current_user.id
         )
         
         # 保存到数据库
-        result = crud_shop.upsert_shop(db, shop_create, user_id=current_user.id)
-        if not result:
-            raise HTTPException(status_code=400, detail="保存店铺信息失败")
-            
-        logger.info(f"成功解析并保存Google Map店铺: {shop_data['name']}")
-        return result
+        try:
+            result = crud_shop.upsert_shop(db, shop_create, user_id=current_user.id)
+            if not result:
+                raise HTTPException(status_code=400, detail="保存店铺信息失败")
+                
+            logger.info(f"成功解析并保存Google Map店铺: {shop_data['name']}")
+            return result
+        except ValueError as ve:
+            # 处理Google Map URL重复的情况
+            logger.warning(f"Google Map URL重复: {ve}")
+            raise HTTPException(status_code=409, detail=str(ve))
         
     except HTTPException:
         raise

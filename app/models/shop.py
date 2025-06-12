@@ -11,4 +11,5 @@ class Shop(Base):
     address = Column(String(255), nullable=False)
     image_url = Column(String(255), nullable=True)
     open_hours = Column(String(100), nullable=True)
+    google_map_url = Column(String(500), nullable=True, unique=True, index=True)
     user_id = Column(Integer, ForeignKey(f'{settings.SCHEMA}.users.id'), nullable=False, index=True) 

@@ -8,6 +8,7 @@ class ShopBase(BaseModel):
     address: str
     image_url: Optional[str]
     open_hours: Optional[str]
+    google_map_url: Optional[str]
 
 class ShopCreate(ShopBase):
     user_id: Optional[int]

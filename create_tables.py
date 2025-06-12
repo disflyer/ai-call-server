@@ -5,4 +5,4 @@ import app.models.user
 
 # 创建所有表
 Base.metadata.create_all(bind=engine)
-print("所有表已创建")
+print("所有表已创建，包含google_map_url唯一约束字段")
