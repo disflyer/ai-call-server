@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.order import Order
 from app.schemas.order import OrderCreate, OrderUpdate
 
@@ -22,13 +22,13 @@ def upsert_order(db: Session, order: OrderCreate, user_id: int) -> Order:
         db.refresh(db_order)
         return db_order
 
-# 获取订单列表（仅当前用户）
+# 获取订单列表（仅当前用户，带shop对象）
 def get_orders(db: Session, user_id: int, skip: int = 0, limit: int = 20):
-    return db.query(Order).filter(Order.user_id == user_id).offset(skip).limit(limit).all()
+    return db.query(Order).options(joinedload(Order.shop)).filter(Order.user_id == user_id).offset(skip).limit(limit).all()
 
 # 获取单个订单（仅当前用户）
 def get_order(db: Session, order_id: int, user_id: int):
-    return db.query(Order).filter(Order.id == order_id, Order.user_id == user_id).first()
+    return db.query(Order).options(joinedload(Order.shop)).filter(Order.id == order_id, Order.user_id == user_id).first()
 
 # 删除订单（仅当前用户）
 def delete_order(db: Session, order_id: int, user_id: int):
