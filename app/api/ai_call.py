@@ -89,7 +89,7 @@ def ai_call_task(task_id, order_id, first_message, system_prompt):
         db.close()
         logger.info(f"[AI-CALL] 任务结束: task_id={task_id}, order_id={order_id}")
 
-@router.post("/create")
+@router.post("/start")
 def start_ai_call(order_id: int, first_message: str, system_prompt: str):
     task_id = str(uuid.uuid4())
     logger.info(f"[AI-CALL] 新建任务: task_id={task_id}, order_id={order_id}")
@@ -98,7 +98,7 @@ def start_ai_call(order_id: int, first_message: str, system_prompt: str):
     thread.start()
     return {"task_id": task_id}
 
-@router.get("/{task_id}")
+@router.get("/status/{task_id}")
 def get_task_status(task_id: str):
     status = task_status.get(task_id, "not_found")
     logger.info(f"[AI-CALL] 查询任务: task_id={task_id}, status={status}")

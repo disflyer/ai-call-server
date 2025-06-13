@@ -44,14 +44,14 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/", response_model=ShopInDB)
+@router.post("/upsert", response_model=ShopInDB)
 def upsert_shop(shop: ShopCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = crud_shop.upsert_shop(db, shop, user_id=current_user.id)
     if not result:
         raise HTTPException(status_code=404, detail="Shop not found or no permission")
     return result
 
-@router.get("/", response_model=List[ShopInDB])
+@router.get("/list", response_model=List[ShopInDB])
 def list_shops(skip: int = 0, limit: int = 20, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return crud_shop.get_shops(db, user_id=current_user.id, skip=skip, limit=limit)
 

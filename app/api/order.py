@@ -16,14 +16,14 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/", response_model=OrderInDB)
+@router.post("/upsert", response_model=OrderInDB)
 def upsert_order(order: OrderCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = crud_order.upsert_order(db, order, user_id=current_user.id)
     if not result:
         raise HTTPException(status_code=404, detail="Order not found or no permission")
     return result
 
-@router.get("/", response_model=List[OrderInDB])
+@router.get("/list", response_model=List[OrderInDB])
 def list_orders(skip: int = 0, limit: int = 20, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return crud_order.get_orders(db, user_id=current_user.id, skip=skip, limit=limit)
 

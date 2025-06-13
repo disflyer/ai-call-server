@@ -25,7 +25,7 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/send_code")
+@router.post("/send-code")
 def send_code(email: str):
     code = ''.join(random.choices(string.digits, k=6))
     verify_codes[email] = code
