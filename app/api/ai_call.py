@@ -1,3 +1,5 @@
+from datetime import datetime
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.base import SessionLocal
 from app.models.order import Order, OrderStatus
@@ -17,9 +19,10 @@ logger = logging.getLogger("ai-call")
 task_status = {}
 
 # 你需要在.env或环境变量中配置以下信息
+load_dotenv()
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "your-elevenlabs-api-key")
 ELEVENLABS_AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "wyCA1CqE6chkD28n2JpT")
-ELEVENLABS_PHONE_NUMBER_ID = os.getenv("ELEVENLABS_PHONE_NUMBER_ID", "+18057492501")
+ELEVENLABS_PHONE_NUMBER_ID = os.getenv("ELEVENLABS_PHONE_NUMBER_ID", "nJwKy2ga71E6ABAL7w3n")
 
 # 调用ElevenLabs batch calling API
 
@@ -31,7 +34,8 @@ def call_elevenlabs_batch(phone_number, call_name="ai-call-task"):
         "agent_phone_number_id": ELEVENLABS_PHONE_NUMBER_ID,
         "recipients": [
             {"phone_number": phone_number}
-        ]
+        ],
+        "scheduled_time_unix": int(datetime.now().timestamp()) + 10,  # 立即执行
     }
     headers = {
         "xi-api-key": ELEVENLABS_API_KEY,
@@ -53,7 +57,7 @@ def update_agent_prompt(agent_id, api_key, first_message, system_prompt):
         "conversation_config": {
             "agent": {
                 "first_message": first_message,
-                "prompt": system_prompt
+                "prompt": {"prompt": system_prompt}
             }
         }
     }
@@ -102,4 +106,4 @@ def start_ai_call(order_id: int, first_message: str, system_prompt: str):
 def get_task_status(task_id: str):
     status = task_status.get(task_id, "not_found")
     logger.info(f"[AI-CALL] 查询任务: task_id={task_id}, status={status}")
-    return {"task_id": task_id, "status": status} 
+    return {"task_id": task_id, "status": status}
