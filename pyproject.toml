@@ -21,6 +21,7 @@ python-multipart = "0.0.9"
 requests = "^2.32.3"
 bcrypt = "^4.3.0"
 google-genai = "^1.18.0"
+httpx = {extras = ["socks"], version = "^0.28.1"}
 
 [tool.poetry.dev-dependencies]
 # 可选：开发依赖
