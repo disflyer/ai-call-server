@@ -7,4 +7,4 @@ app = FastAPI(title="AI Call Server 订餐API", description="AI帮用户打电�
 app.include_router(shop.router)
 app.include_router(order.router)
 app.include_router(user.router)
-app.include_router(ai_call.router) 
+app.include_router(ai_call.router)
